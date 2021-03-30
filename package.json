@@ -1,0 +1,24 @@
+{
+  "name": "vizequal",
+  "version": "1.0.0",
+  "description": "Compare images and webpages",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bzhoek/vizequal.git"
+  },
+  "keywords": [
+    "visual",
+    "check"
+  ],
+  "author": "\"Bas van der Hoek\" <bas@hoek.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bzhoek/vizequal/issues"
+  },
+  "homepage": "https://github.com/bzhoek/vizequal#readme"
+}
