@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/bzhoek/vizequal/issues"
   },
-  "homepage": "https://github.com/bzhoek/vizequal#readme"
+  "homepage": "https://github.com/bzhoek/vizequal#readme",
+  "dependencies": {
+    "puppeteer": "^8.0.0"
+  }
 }
