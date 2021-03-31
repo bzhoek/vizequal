@@ -1,4 +1,6 @@
 import puppeteer from 'puppeteer';
+import fs from "fs";
+import child_process from "child_process";
 
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -8,41 +10,47 @@ export const make_png = async (url, prefix, debug = false) => {
     browser = await puppeteer.launch({headless: !debug, devtools: debug});
 
     const page = await browser.newPage();
-    await page.setViewport({width: 800, height: 1122})
+    let pageHeight = 1122;
+    await page.setViewport({width: 800, height: pageHeight})
 
     await page.goto(url, {waitUntil: 'networkidle2'});
-    await page.waitForSelector(".pagedjs_pages", {timeout: 5000});
 
-    for (let nr = 1; nr < 11; nr++) {
-      let result = await page.evaluate((nr) => {
-        for (let i = 1; i < 100; i++) {
-          let page = document.getElementById(`page-${i}`)
-          if (page !== null) {
-            page.style.display = i === nr ? 'block' : 'none'
-            window.scrollTo(0, page.scrollHeight)
-          } else {
-            return nr >= i ? null : nr
-          }
+    const bodyHeight = await page.evaluate((_) => {
+      return document.body.scrollHeight
+    })
+
+    await page.setViewport({width: 800, height: bodyHeight})
+
+    await page.screenshot({
+      path: `${prefix}-full.png`,
+      fullPage: true,
+    });
+
+    for (let nr = 0; nr * pageHeight < bodyHeight; nr++) {
+      const pg = await page.evaluate((nr) => {
+        let el = document.getElementById(`page-${nr}`);
+        if (el === null) {
+          return {top: 0, height: document.body.scrollHeight}
+        } else {
+          return {top: el.getBoundingClientRect().top, height: el.scrollHeight}
         }
-      }, nr)
-      console.log(nr, result)
-
-      await delay(500)
-      if (result !== null) {
-        let output = `${prefix}-${nr}.png`
-        await page.screenshot({
-          path: output,
-          fullPage: true,
-        });
-        console.log(`Wrote to ${output}`)
-      }
+      }, nr + 1)
+      await page.screenshot({
+        path: `${prefix}-${nr + 1}.png`,
+        clip: {
+          x: 0,
+          y: pg.top,
+          width: 800,
+          height: pg.height,
+        }
+      });
     }
 
   } catch (err) {
     console.log(err.message);
   } finally {
     if (browser) {
-      browser.close();
+      await browser.close();
     }
   }
 };
