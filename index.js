@@ -58,10 +58,10 @@ export const make_png = async (url, prefix, debug = false) => {
 export const compare_images = (before, latest, diff) => {
   try {
     child_process.execSync(`compare -metric AE ${before} ${latest} ${diff}`).toString();
-    if (fs.existsSync(diffFile)) {
-      fs.unlinkSync(diffFile)
+    if (fs.existsSync(diff)) {
+      fs.unlinkSync(diff)
     }
-    fs.unlinkSync(latestFile)
+    fs.unlinkSync(latest)
     return true
   } catch (error) {
     return false
