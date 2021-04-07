@@ -1,4 +1,4 @@
-import {compare_images, make_png} from './index.js';
+import {compare_images, make_paged_png} from './index.js';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -9,7 +9,7 @@ if (args.length !== 2) {
 }
 
 const run = async (url, prefix) => {
-  await make_png(url, `${prefix}-latest`).then(() => console.log("Done."))
+  await make_paged_png(url, `${prefix}-latest`).then(() => console.log("Done."))
   let folder = path.dirname(prefix)
   fs.readdir(folder).then((files) => {
     files.forEach((file) => {

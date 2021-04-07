@@ -4,7 +4,7 @@ import child_process from "child_process";
 
 export const delay = ms => new Promise(res => setTimeout(res, ms));
 
-export const make_png = async (url, prefix, debug = false) => {
+export const make_paged_png = async (url, prefix, debug = false) => {
   let browser;
   try {
     browser = await puppeteer.launch({headless: !debug, devtools: debug});
