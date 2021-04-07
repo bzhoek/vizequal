@@ -55,6 +55,33 @@ export const make_paged_png = async (url, prefix, debug = false) => {
   }
 };
 
+export const make_full_png = async (url, prefix, debug = false) => {
+  let browser;
+  try {
+    browser = await puppeteer.launch({headless: !debug, devtools: debug});
+
+    const page = await browser.newPage();
+    await page.goto(url, {waitUntil: 'networkidle2'});
+
+    const bodyHeight = await page.evaluate((_) => {
+      return document.body.scrollHeight
+    })
+
+    await page.setViewport({width: 1280, height: bodyHeight})
+
+    await page.screenshot({
+      path: `${prefix}.png`,
+      fullPage: true,
+    });
+  } catch (err) {
+    console.log(err.message);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+};
+
 export const compare_images = (before, latest, diff) => {
   try {
     child_process.execSync(`compare -metric AE ${before} ${latest} ${diff}`).toString();
