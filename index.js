@@ -1,10 +1,10 @@
-import puppeteer from 'puppeteer';
-import fs from "fs";
-import child_process from "child_process";
+const puppeteer = require('puppeteer');
+const fs = require('fs');
+const child_process = require('child_process');
 
-export const delay = ms => new Promise(res => setTimeout(res, ms));
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
-export const make_paged_png = async (url, prefix, debug = false) => {
+const make_paged_png = async (url, prefix, debug = false) => {
   let browser;
   try {
     browser = await puppeteer.launch({headless: !debug, devtools: debug});
@@ -55,13 +55,13 @@ export const make_paged_png = async (url, prefix, debug = false) => {
   }
 };
 
-export const make_full_png = async (url, prefix, debug = false) => {
+const make_full_png = async (url, filepath, debug = false) => {
   let browser;
   try {
     browser = await puppeteer.launch({headless: !debug, devtools: debug});
 
     const page = await browser.newPage();
-    await page.goto(url, {waitUntil: 'networkidle2'});
+    await page.goto(url, {waitUntil: 'networkidle0'});
 
     const bodyHeight = await page.evaluate((_) => {
       return document.body.scrollHeight
@@ -70,7 +70,7 @@ export const make_full_png = async (url, prefix, debug = false) => {
     await page.setViewport({width: 1280, height: bodyHeight})
 
     await page.screenshot({
-      path: `${prefix}.png`,
+      path: filepath,
       fullPage: true,
     });
   } catch (err) {
@@ -82,7 +82,7 @@ export const make_full_png = async (url, prefix, debug = false) => {
   }
 };
 
-export const compare_images = (before, latest, diff) => {
+const compare_images = (before, latest, diff) => {
   try {
     child_process.execSync(`compare -metric AE ${before} ${latest} ${diff}`).toString();
     if (fs.existsSync(diff)) {
@@ -94,3 +94,23 @@ export const compare_images = (before, latest, diff) => {
     return false
   }
 }
+
+async function scroll(page) {
+  return await page.evaluate(async () => {
+    return await new Promise((resolve, reject) => {
+      var i = setInterval(() => {
+        window.scrollBy(0, window.innerHeight);
+        if (
+          document.scrollingElement.scrollTop + window.innerHeight >=
+          document.scrollingElement.scrollHeight
+        ) {
+          window.scrollTo(0, 0);
+          clearInterval(i);
+          resolve();
+        }
+      }, 100);
+    });
+  });
+}
+
+module.exports = {make_paged_png, make_full_png, compare_images}

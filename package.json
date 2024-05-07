@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Compare images and webpages",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,6 +21,7 @@
   },
   "homepage": "https://github.com/bzhoek/vizequal#readme",
   "dependencies": {
-    "puppeteer": "^8.0.0"
+    "commander": "^12.0.0",
+    "puppeteer": "22.8.0"
   }
 }
