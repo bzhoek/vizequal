@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const fsp = require('fs/promises');
 const child_process = require('child_process');
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -61,7 +62,7 @@ const make_full_png = async (url, filepath, debug = false) => {
     browser = await puppeteer.launch({headless: !debug, devtools: debug});
 
     const page = await browser.newPage();
-    await page.goto(url, {waitUntil: 'networkidle0'});
+    await page.goto(url, {waitUntil: 'networkidle0', timeout: 5000});
 
     const bodyHeight = await page.evaluate((_) => {
       return document.body.scrollHeight
@@ -113,4 +114,25 @@ async function scroll(page) {
   });
 }
 
-module.exports = {make_paged_png, make_full_png, compare_images}
+async function compare_url(url, filename) {
+  let latest = `snapshots/${filename}-latest.png`;
+  console.log(`Writing ${url} to ${latest}`)
+  await make_full_png(url, latest).then(() => console.log("Done."));
+  let original = `snapshots/${filename}.png`;
+  console.log(`Comparing ${original} to ${latest}`)
+  fsp.stat(original).then((stat) => {
+    if (stat.isFile()) {
+      compare_images(original, latest, `snapshots/${filename}-diff.png`)
+    }
+  }).catch(() => {
+    fsp.rename(latest, original)
+      .then(() => {
+        console.log(original, "does not exist. Creating from latest.")
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+  })
+}
+
+module.exports = {make_paged_png, make_full_png, compare_images, compare_url}
